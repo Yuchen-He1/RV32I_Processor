@@ -4,7 +4,7 @@
 // and have 2 select bits to select the type of immediate value to be generated.
 module immgen (
     input [31:0] instruction,
-    input [1:0] imm_select,
+    input [2:0] imm_select,
     output reg [31:0] imm
 );
 
