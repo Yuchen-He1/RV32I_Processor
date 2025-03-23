@@ -17,3 +17,4 @@ module mux4 (
             default: out = 32'b0;
         endcase
     end
+endmodule
