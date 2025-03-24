@@ -1,0 +1,199 @@
+# @cocotb.test()
+# async def test_datapath_simple(dut):
+#     """Test datapath functionality with simple R-type instructions"""
+#     # Generate the test program
+#     #generate_test_program()
+#     #len=generate_branch_program()
+#     #len=generate_memory_program()
+#     len=generate_jump_program()
+    
+#     # Clock setup
+#     clock = Clock(dut.clk, 10, units="ns")
+#     cocotb.start_soon(clock.start())
+    
+#     # Reset the processor
+#     dut.rst.value = 1
+#     await ClockCycles(dut.clk, 2)
+#     dut.rst.value = 0
+    
+#     # Run for 10 cycles (enough for our 4 instructions)
+#     for i in range(len):
+#         # Get current PC and instruction
+#         await RisingEdge(dut.clk)
+#         pc_val = int(dut.PC.value)
+#         instr_val = int(dut.instruction.value)
+#         dut._log.info(f"\n\n===== Cycle {i}: PC = 0x{pc_val:08x}, Instruction = 0x{instr_val:08x} =====")
+        
+#         # ------ Print PC and PC-related signals ------
+#         try:
+#             pc_current = int(dut.pc_current.value)
+#             pc_plus_4 = int(dut.pc_plus_4.value)
+#             pc_next = int(dut.pc_next.value)
+#             dut._log.info(f"\nPC Register:")
+#             dut._log.info(f"  current=0x{pc_current:08x}")
+#             dut._log.info(f"  plus_4=0x{pc_plus_4:08x}")
+#             dut._log.info(f"  next=0x{pc_next:08x}")
+            
+#             # # Analyze PC value sequence
+#             # expected_pc = i * 4
+#             # if pc_val != expected_pc:
+#             #     dut._log.warning(f"  PC Sequence Issue: PC value is 0x{pc_val:08x}, expected 0x{expected_pc:08x}")
+#             #     dut._log.warning(f"  PC Difference: {pc_val - expected_pc} bytes")
+#         except Exception as e:
+#             dut._log.warning(f"\nError reading PC signals: {e}")
+            
+#         # ------ Print Instruction Memory (Imem) output ------
+#         try:
+#             instruction = int(dut.instruction.value)
+#             dut._log.info(f"\nImem:")
+#             dut._log.info(f"  instruction=0x{instruction:08x}")
+            
+#             # Decode instruction for better readability
+#             opcode = instruction & 0x7F
+#             rd = (instruction >> 7) & 0x1F
+#             funct3 = (instruction >> 12) & 0x7
+#             rs1 = (instruction >> 15) & 0x1F
+#             rs2 = (instruction >> 20) & 0x1F
+#             funct7 = (instruction >> 25) & 0x7F
+#             dut._log.info(f"  Decoded:")
+#             dut._log.info(f"    opcode=0x{opcode:02x}")
+#             dut._log.info(f"    rd=x{rd}")
+#             dut._log.info(f"    funct3=0x{funct3:x}")
+#             dut._log.info(f"    rs1=x{rs1}")
+#             dut._log.info(f"    rs2=x{rs2}")
+#             dut._log.info(f"    funct7=0x{funct7:02x}")
+#         except Exception as e:
+#             dut._log.warning(f"\nError reading Imem: {e}")
+        
+#         # ------ Print Control Logic signals ------
+#         try:
+#             pcsel = int(dut.control_logic_inst.pcsel.value)
+#             alu_op = int(dut.control_logic_inst.alu_op.value)
+#             operand1_sel = int(dut.control_logic_inst.operand1_sel.value)
+#             operand2_sel = int(dut.control_logic_inst.operand2_sel.value)
+#             reg_write = int(dut.control_logic_inst.reg_write.value)
+#             immgen_sel = int(dut.control_logic_inst.immgen_sel.value)
+#             dmem_write = int(dut.control_logic_inst.dmem_write.value)
+#             dmem_read = int(dut.control_logic_inst.dmem_read.value)
+#             brunsigned = int(dut.control_logic_inst.brunsigned.value)
+#             writeback_sel = int(dut.control_logic_inst.writeback_sel.value)
+            
+#             dut._log.info(f"\ncontrol_logic_inst:")
+#             dut._log.info(f"  pcsel={pcsel}")
+#             dut._log.info(f"  alu_op=0x{alu_op:x}")
+#             dut._log.info(f"  operand1_sel={operand1_sel}")
+#             dut._log.info(f"  operand2_sel={operand2_sel}")
+#             dut._log.info(f"  reg_write={reg_write}")
+#             dut._log.info(f"  immgen_sel={immgen_sel}")
+#             dut._log.info(f"  dmem_write={dmem_write}")
+#             dut._log.info(f"  dmem_read={dmem_read}")
+#             dut._log.info(f"  brunsigned={brunsigned}")
+#             dut._log.info(f"  writeback_sel={writeback_sel}")
+#         except Exception as e:
+#             dut._log.warning(f"\nError reading control_logic_inst: {e}")
+            
+#         # ------ Print Immediate Generator output ------
+#         try:
+#             imm = int(dut.immgen_inst.imm.value)
+#             dut._log.info(f"\nimmgen_inst:")
+#             dut._log.info(f"  imm=0x{imm:08x} ({imm})")
+#         except Exception as e:
+#             dut._log.warning(f"\nError reading immgen_inst: {e}")
+            
+#         # ------ Print Register File signals ------
+#         try:
+#             rs1_addr = int(dut.reg_file_inst.rs1_addr.value)
+#             rs2_addr = int(dut.reg_file_inst.rs2_addr.value)
+#             rd_addr = int(dut.reg_file_inst.rd_addr.value)
+#             rs1_data = int(dut.reg_file_inst.rs1_data.value)
+#             rs2_data = int(dut.reg_file_inst.rs2_data.value)
+#             rd_data = int(dut.reg_file_inst.rd_data.value)
+            
+#             dut._log.info(f"\nreg_file_inst:")
+#             dut._log.info(f"  rs1_addr=x{rs1_addr}")
+#             dut._log.info(f"  rs2_addr=x{rs2_addr}")
+#             dut._log.info(f"  rd_addr=x{rd_addr}")
+#             dut._log.info(f"  rs1_data=0x{rs1_data:08x} ({rs1_data})")
+#             dut._log.info(f"  rs2_data=0x{rs2_data:08x} ({rs2_data})")
+#             dut._log.info(f"  rd_data=0x{rd_data:08x} ({rd_data})")
+#             dut._log.info(f"  reg_write={reg_write}")
+            
+#             # Print all registers for debugging
+#             dut._log.info(f"  Registers:")
+#             for reg_idx in range(0, 16):  # Print registers x0-x15
+#                 try:
+#                     reg_val = int(dut.reg_file_inst.registers[reg_idx].value)
+#                     dut._log.info(f"    x{reg_idx} = {reg_val}")
+#                 except:
+#                     dut._log.info(f"    x{reg_idx} = not accessible")
+#         except Exception as e:
+#             dut._log.warning(f"\nError reading reg_file_inst: {e}")
+            
+#         # ------ Print Branch Comparator signals ------
+#         try:
+#             breq = int(dut.branch_comparator.breq.value)
+#             brlt = int(dut.branch_comparator.brlt.value)
+#             dut._log.info(f"\nbranch_comparator:")
+#             dut._log.info(f"  breq={breq}")
+#             dut._log.info(f"  brlt={brlt}")
+#             dut._log.info(f"  brunsigned={brunsigned}")
+#         except Exception as e:
+#             dut._log.warning(f"\nError reading branch_comparator: {e}")
+            
+#         # ------ Print ALU Mux signals ------
+#         try:
+#             alu_operand1 = int(dut.alu_operand1.value)
+#             alu_operand2 = int(dut.alu_operand2.value)
+#             dut._log.info(f"\nALU operands (mux outputs):")
+#             dut._log.info(f"  alu_operand1=0x{alu_operand1:08x} ({alu_operand1})")
+#             dut._log.info(f"  alu_operand2=0x{alu_operand2:08x} ({alu_operand2})")
+#         except Exception as e:
+#             dut._log.warning(f"\nError reading ALU operands: {e}")
+            
+#         # ------ Print ALU signals ------
+#         try:
+#             alu_a = int(dut.alu_inst.a.value)
+#             alu_b = int(dut.alu_inst.b.value)
+#             alu_control = int(dut.alu_inst.alu_control.value)
+#             alu_result = int(dut.alu_inst.result.value)
+#             dut._log.info(f"\nalu_inst:")
+#             dut._log.info(f"  a=0x{alu_a:08x} ({alu_a})")
+#             dut._log.info(f"  b=0x{alu_b:08x} ({alu_b})")
+#             dut._log.info(f"  alu_control=0x{alu_control:x}")
+#             dut._log.info(f"  result=0x{alu_result:08x} ({alu_result})")
+#         except Exception as e:
+#             dut._log.warning(f"\nError reading alu_inst: {e}")
+            
+#         # ------ Print Data Memory signals ------
+#         try:
+#             dmem_addr = int(dut.dmem_inst.addr.value)
+#             dmem_input_data = int(dut.dmem_inst.input_data.value)
+#             dmem_output_data = int(dut.dmem_inst.output_data.value)
+#             dut._log.info(f"\ndmem_inst:")
+#             dut._log.info(f"  addr=0x{dmem_addr:08x}")
+#             dut._log.info(f"  input_data=0x{dmem_input_data:08x}")
+#             dut._log.info(f"  output_data=0x{dmem_output_data:08x}")
+#             dut._log.info(f"  store={dmem_write}")
+#             dut._log.info(f"  load={dmem_read}")
+#         except Exception as e:
+#             dut._log.warning(f"\nError reading dmem_inst: {e}")
+            
+#         # ------ Print Writeback Mux signals ------
+#         try:
+#             wb_a = int(dut.writeback_mux.a.value)
+#             wb_b = int(dut.writeback_mux.b.value)
+#             wb_c = int(dut.writeback_mux.c.value)
+#             wb_d = int(dut.writeback_mux.d.value)
+#             wb_out = int(dut.writeback_mux.out.value)
+#             dut._log.info(f"\nwriteback_mux:")
+#             dut._log.info(f"  a=0x{wb_a:08x} (PC+4)")
+#             dut._log.info(f"  b=0x{wb_b:08x} (DMEM data)")
+#             dut._log.info(f"  c=0x{wb_c:08x} (ALU result)")
+#             dut._log.info(f"  d=0x{wb_d:08x} (unused)")
+#             dut._log.info(f"  sel={writeback_sel}")
+#             dut._log.info(f"  out=0x{wb_out:08x} ({wb_out})")
+#         except Exception as e:
+#             dut._log.warning(f"\nError reading writeback_mux: {e}")
+#     # Add one more clock cycle to allow register writes to complete
+#     await RisingEdge(dut.clk)
+

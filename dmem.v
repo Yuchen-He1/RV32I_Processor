@@ -20,20 +20,34 @@ module Dmem (
             mem[i] = 32'b0;
         end
     end
-    // sync write and sync read
+    // sync write and sync read X
+    // always @(posedge clk or posedge rst) begin
+    //     if (rst) begin
+    //         output_data <= 32'b0;
+    //     end else begin
+    //         if (store) 
+    //             mem[addr[31:2]] <= input_data; 
+                
+    //         if (load) 
+    //             output_data <= mem[addr[31:2]];
+    //         else 
+    //             output_data <= 32'b0;
+    //     end
+    // end
+    // Synchronous write, asynchronous read
     always @(posedge clk or posedge rst) begin
         if (rst) begin
-            output_data <= 32'b0;
+            // Reset logic
         end else begin
             if (store) 
                 mem[addr[31:2]] <= input_data; 
-                
-            if (load) 
-                output_data <= mem[addr[31:2]];
-            else 
-                output_data <= 32'b0;
         end
     end
-
-
+    // Asynchronous read - outside the clocked always block
+    always @* begin
+        if (load)
+            output_data = mem[addr[31:2]];
+        else
+            output_data = 32'b0;
+    end
 endmodule
