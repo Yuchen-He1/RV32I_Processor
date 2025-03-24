@@ -289,3 +289,93 @@ async def test_B_type_BEQ_Njump(dut):
     assert  temp_tuple == expected_val, (
         f"control logic={temp_tuple}, expected={expected_val}"
     )
+@cocotb.test()
+async def test_R_type_ADD(dut):
+    """Test control logic for R-type instruction"""
+    dut.instruction.value =0x33
+    await Timer(1, units='ns')
+    # Check output
+    # expected_val is a tuple of all the output values
+    expected_val = (
+        0b0,#pcsel
+        0b0,#operand1_sel
+        0b1,#operand2_sel
+        0b1,#reg_write
+        0b111,#immgen_sel
+        0b0,#dmem_read
+        0b0,#dmem_write
+        0b0,#brunsigned
+        0b10,#writeback_sel
+        0b0000#alu_op
+        )
+    temp_tuple =(
+        dut.pcsel.value,
+        dut.operand1_sel.value,
+        dut.operand2_sel.value,
+        dut.reg_write.value,
+        dut.immgen_sel.value,
+        dut.dmem_write.value,
+        dut.dmem_read.value,
+        dut.brunsigned.value,
+        dut.writeback_sel.value,
+        dut.alu_op.value,
+    )
+    await Timer(1, units='ns')
+    dut._log.info(f"pcsel={temp_tuple[0]}\n"
+              f"operand1_sel={temp_tuple[1]}\n"
+              f"operand2_sel={temp_tuple[2]}\n"
+              f"reg_write={temp_tuple[3]}\n"
+              f"immgen_sel={temp_tuple[4]}\n"
+              f"dmem_write={temp_tuple[5]}\n"
+              f"dmem_read={temp_tuple[6]}\n"
+              f"brunsigned={temp_tuple[7]}\n"
+              f"writeback_sel={temp_tuple[8]}\n"
+              f"alu_op={temp_tuple[9]}")
+    assert  temp_tuple == expected_val, (
+        f"control logic={temp_tuple}, expected={expected_val}"
+    )
+@cocotb.test()
+async def test_R_type_SUB(dut):
+    """Test control logic for R-type instruction"""
+    dut.instruction.value =0x40000033
+    await Timer(1, units='ns')
+    # Check output
+    # expected_val is a tuple of all the output values
+    expected_val = (
+        0b0,#pcsel
+        0b0,#operand1_sel
+        0b1,#operand2_sel
+        0b1,#reg_write
+        0b111,#immgen_sel
+        0b0,#dmem_read
+        0b0,#dmem_write
+        0b0,#brunsigned
+        0b10,#writeback_sel
+        0b0001#alu_op
+        )
+    temp_tuple =(
+        dut.pcsel.value,
+        dut.operand1_sel.value,
+        dut.operand2_sel.value,
+        dut.reg_write.value,
+        dut.immgen_sel.value,
+        dut.dmem_write.value,
+        dut.dmem_read.value,
+        dut.brunsigned.value,
+        dut.writeback_sel.value,
+        dut.alu_op.value,
+    )
+    await Timer(1, units='ns')
+    dut._log.info(f"pcsel={temp_tuple[0]}\n"
+              f"operand1_sel={temp_tuple[1]}\n"
+              f"operand2_sel={temp_tuple[2]}\n"
+              f"reg_write={temp_tuple[3]}\n"
+              f"immgen_sel={temp_tuple[4]}\n"
+              f"dmem_write={temp_tuple[5]}\n"
+              f"dmem_read={temp_tuple[6]}\n"
+              f"brunsigned={temp_tuple[7]}\n"
+              f"writeback_sel={temp_tuple[8]}\n"
+              f"alu_op={temp_tuple[9]}")
+    assert  temp_tuple == expected_val, (
+        f"control logic={temp_tuple}, expected={expected_val}"
+    )

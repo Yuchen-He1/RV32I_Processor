@@ -12,7 +12,7 @@ module Imem (
     // for test purpose, we only have 64 instructions
     initial begin
         $readmemh("instructions.txt", mem);
-        $display("Mem[0] = %h", mem[0]);
+        //$display("Mem[0] = %h", mem[0]);
     end
 
     
