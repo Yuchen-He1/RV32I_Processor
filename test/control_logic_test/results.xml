@@ -1,0 +1,11 @@
+<testsuites name="results">
+  <testsuite name="all" package="all">
+    <property name="random_seed" value="1742774901" />
+    <testcase name="test_J_type" classname="control_logic_test" file="/home/hylanc/ucsb_ms/verilog_learn/single_cycle_processor/test/control_logic_test/control_logic_test.py" lineno="6" time="0.0007722377777099609" sim_time_ns="2.001" ratio_time="2591.1708255634453" />
+    <testcase name="test_I_type_JALR" classname="control_logic_test" file="/home/hylanc/ucsb_ms/verilog_learn/single_cycle_processor/test/control_logic_test/control_logic_test.py" lineno="62" time="0.0003235340118408203" sim_time_ns="2.001" ratio_time="6184.821152542372" />
+    <testcase name="test_I_type_LW" classname="control_logic_test" file="/home/hylanc/ucsb_ms/verilog_learn/single_cycle_processor/test/control_logic_test/control_logic_test.py" lineno="109" time="0.0003192424774169922" sim_time_ns="2.0010000000000003" ratio_time="6267.962885735625" />
+    <testcase name="test_S_type_SW" classname="control_logic_test" file="/home/hylanc/ucsb_ms/verilog_learn/single_cycle_processor/test/control_logic_test/control_logic_test.py" lineno="155" time="0.0002727508544921875" sim_time_ns="2.0009999999999994" ratio_time="7336.365650349649" />
+    <testcase name="test_B_type_BEQ_jump" classname="control_logic_test" file="/home/hylanc/ucsb_ms/verilog_learn/single_cycle_processor/test/control_logic_test/control_logic_test.py" lineno="200" time="0.0003609657287597656" sim_time_ns="2.0010000000000012" ratio_time="5543.46255217966" />
+    <testcase name="test_B_type_BEQ_Njump" classname="control_logic_test" file="/home/hylanc/ucsb_ms/verilog_learn/single_cycle_processor/test/control_logic_test/control_logic_test.py" lineno="246" time="0.00030231475830078125" sim_time_ns="2.0009999999999994" ratio_time="6618.929261829651" />
+  </testsuite>
+</testsuites>
