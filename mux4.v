@@ -1,15 +1,15 @@
 // this file is helper for 4 bit mux 
 
-module mux4 (
-    input wire [31:0] a,
-    input wire [31:0] b,
-    input wire [31:0] c,
-    input wire [31:0] d,
-    input wire [1:0] sel,
-    output reg [31:0] out
+module Mux4 (
+    input wire [`DATA_WIDTH-1:0] i_a,
+    input wire [`DATA_WIDTH-1:0] i_b,
+    input wire [`DATA_WIDTH-1:0] i_c,
+    input wire [`DATA_WIDTH-1:0] i_d,
+    input wire [`DATA_WIDTH-1:0] i_sel,
+    output reg [`DATA_WIDTH-1:0] o_res
 );
     always @* begin
-        case (sel)
+        case (i_sel)
             2'b00: out = a;
             2'b01: out = b;
             2'b10: out = c;

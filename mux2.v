@@ -1,9 +1,16 @@
 // this file is helper for 2 bit mux
-module mux2 (
-    input wire [31:0] a,
-    input wire [31:0] b,
-    input wire sel,
-    output wire [31:0] out
+
+module Mux2 (
+    input wire [`DATA_WIDTH-1:0] i_a,
+    input wire [`DATA_WIDTH-1:0] i_b,
+    input wire i_sel,
+    output reg [`DATA_WIDTH-1:0] o_res
 );
-    assign out = (sel) ? b : a;
+    always @* begin
+        case (i_sel)
+            2'b00: out = a;
+            2'b01: out = b;
+            default: out = 32'b0;
+        endcase
+    end
 endmodule

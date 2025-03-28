@@ -1,28 +1,41 @@
 // this file is register file for single cycle processor.
 // ISA based on RV32I
 
-module reg_file (
-    input wire clk,
-    input wire rst,
-    input [4:0] rs1_addr,
-    input [4:0] rs2_addr,
-    input [4:0] rd_addr,
-    input [31:0] rd_data,
-    input reg_write,
-    output [31:0] rs1_data,
-    output [31:0] rs2_data
+module Reg_file (
+    input wire i_clk,
+    input wire i_rst,
+    input wire i_rw,
+    input wire [$clog2(`NUM_REGISTER)-1:0] i_rd_addr,
+    input wire [`DATA_WIDTH-1:0] i_rd,
+    input wire [$clog2(`NUM_REGISTER)-1:0] i_rs1_addr,     
+    input wire [$clog2(`NUM_REGISTER)-1:0] i_rs2_addr,
+    output wire [`DATA_WIDTH-1:0] o_rs1,     
+    output wire [`DATA_WIDTH-1:0] o_rs2
 );
 
-    reg [31:0] registers [0:31];
-    // x0 is hardwired to 0, if try to read x0 it will return 0
-    assign rs1_data = (rs1_addr==5'b0) ? 32'b0 : registers[rs1_addr];
-    assign rs2_data = (rs2_addr==5'b0) ? 32'b0 : registers[rs2_addr];
+    reg [`DATA_WIDTH-1:0] registers [`NUM_REGISTER-1:0];
+    integer i;
 
-    always @(posedge clk) begin
+    initial begin
+        for (i = 0; i < `NUM_REGISTER; i = i + 1) begin
+            registers[i] = 0;  // Initialize each memory location to 0
+        end
+    end
+
+    // x0 is hardwired to 0, if try to read x0 it will return 0
+    assign o_rs1 = (i_rs1_addr==5'b0) ? 32'b0 : registers[i_rs1_addr];
+    assign o_rs2 = (i_rs2_addr==5'b0) ? 32'b0 : registers[i_rs2_addr];
+
+
+    always @(posedge i_clk or posedge i_rst) begin
         // reset remain empty
         // need to figure out when need reset
-        if (reg_write && rd_addr != 5'b0) begin
-            registers[rd_addr] <= rd_data;
+        if (i_rst) begin
+            for (i = 1; i < 32; i = i + 1) begin
+                registers[i] <= 32'b0;
+            end
+        end else if (i_rw && i_rd_addr != 5'b0) begin
+            registers[i_rd_addr] <= i_rd;
         end
     end
 endmodule

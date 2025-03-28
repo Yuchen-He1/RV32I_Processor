@@ -1,35 +1,28 @@
 // this file is immediate number generator for single cycle processor.
 // ISA based on RV32I
-// it accepts 32-bit instruction and generates 32-bit immediate value.
+// it accepts 32-bit i_inst and generates 32-bit immediate value.
 // and have 2 select bits to select the type of immediate value to be generated.
-module immgen (
-    input [31:0] instruction,
-    input [2:0] imm_select,
-    output reg [31:0] imm
+
+module Immgen (
+    input wire [2:0] i_imm_ctrl,
+    input wire [`INST_WIDTH-1:0] i_inst,
+    output reg [`DATA_WIDTH-1:0] o_imm
 );
 
-
-
-// imm_select = 000 -> I-type immediate
-// imm_select = 001 -> S-type immediate
-// imm_select = 010 -> B-type immediate
-// imm_select = 011 -> J-type immediate
-// imm_select = 100 -> U-type immediate
-
-// I-type immediate = instruction[31:20]
-// S-type immediate = {instruction[31:25], instruction[11:7]}
-// B-type immediate = {instruction[31], instruction[7], instruction[30:25], instruction[11:8], 1'b0}
-// J-type immediate = {instruction[31], instruction[19:12], instruction[20], instruction[30:21], 1'b0}  // 20 bits
-// U-type immediate = instruction[31:12] << 12
+// I-type immediate = i_inst[31:20]
+// S-type immediate = {i_inst[31:25], i_inst[11:7]}
+// B-type immediate = {i_inst[31], i_inst[7], i_inst[30:25], i_inst[11:8], 1'b0}
+// J-type immediate = {i_inst[31], i_inst[19:12], i_inst[20], i_inst[30:21], 1'b0}  // 20 bits
+// U-type immediate = i_inst[31:12] << 12
 
 always @* begin
-    case (imm_select)
-        3'b000: imm = {{20{instruction[31]}}, instruction[31:20]}; // I-type immediate
-        3'b001: imm = {{20{instruction[31]}}, instruction[31:25], instruction[11:7]}; // S-type immediate
-        3'b010: imm = {{19{instruction[31]}}, instruction[31], instruction[7], instruction[30:25], instruction[11:8], 1'b0}; // B-type immediate
-        3'b011: imm = {{11{instruction[31]}}, instruction[31], instruction[19:12], instruction[20], instruction[30:21], 1'b0}; // J-type immediate
-        3'b100: imm = {instruction[31:12], 12'b0}; // U-type immediate
-        default: imm = 32'b0;
+    case (i_imm_ctrl)
+        `IMM_I_TYPE: o_imm = {{20{i_inst[31]}}, i_inst[31:20]}; // I-type immediate
+        `IMM_S_TYPE: o_imm = {{20{i_inst[31]}}, i_inst[31:25], i_inst[11:7]}; // S-type immediate
+        `IMM_B_TYPE: o_imm = {{19{i_inst[31]}}, i_inst[31], i_inst[7], i_inst[30:25], i_inst[11:8], 1'b0}; // B-type immediate
+        `IMM_J_TYPE: o_imm = {{11{i_inst[31]}}, i_inst[31], i_inst[19:12], i_inst[20], i_inst[30:21], 1'b0}; // J-type immediate
+        `IMM_U_TYPE: o_imm = {i_inst[31:12], 12'b0}; // U-type immediate
+        default: o_imm = 32'b0;
     endcase
 end
 

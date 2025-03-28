@@ -2,62 +2,54 @@
 
 // we support beq,bne,blt,bltu(bge,bgeu is implicit support
 // since we support blt,bltu)
-module brcmptop (
-    input wire [31:0] rs1,
-    input wire [31:0] rs2,
-    input wire unsigned_cmp, //0 signed, 1 unsigned
-    output wire breq, // 0 not equal, 1 equal
-    output wire brlt  // 0 not less than, 1 less than
+
+module Brcmptop (
+    input wire [`DATA_WIDTH-1:0] i_rs1,
+    input wire [`DATA_WIDTH-1:0] i_rs2,
+    input wire i_brun, //0 signed, 1 unsigned
+    output wire o_breq, // 0 not equal, 1 equal
+    output wire o_brlt  // 0 not less than, 1 less than
+    // output wire o_bge  // 0 not greater | equal than, 1 greater | equal than
 );
-    wire temp_breq_s, temp_breq_u, temp_brlt_s, temp_brlt_u;
+    wire temp_brlt_s, temp_brlt_u
     brcmp cmp (
-        .rs1(rs1),
-        .rs2(rs2),
-        .unsigned_cmp(unsigned_cmp),
-        .breq_s(temp_breq_s),
-        .breq_u(temp_breq_u),
-        .brlt_s(temp_brlt_s),
-        .brlt_u(temp_brlt_u)
+        .i_rs1(i_rs1),
+        .i_rs2(i_rs2),
+        .o_breq(o_breq),
+        .o_brlt_s(temp_brlt_s),
+        .o_brlt_u(temp_brlt_u)
     );
-    helper_mux mux1 (
-        .a(temp_breq_s),
-        .b(temp_breq_u),
-        .sel(unsigned_cmp),
-        .out(breq)
-    );
-    helper_mux mux2 (
-        .a(temp_brlt_s),
-        .b(temp_brlt_u),
-        .sel(unsigned_cmp),
-        .out(brlt)
+    helper_mux mux (
+        .i_a(temp_brlt_s),
+        .i_b(temp_brlt_u),
+        .i_sel(i_brun),
+        .o_res(o_brlt)
     );  
 endmodule
 
 module helper_mux (
-    input wire a,
-    input wire b,
-    input wire sel,
-    output wire out
+    input wire i_a,
+    input wire i_b,
+    input wire i_sel,
+    output wire o_res
 );
-    assign out = (sel) ? b : a;
+    assign o_res = (i_sel) ? i_b : i_a;
 endmodule
 
 module brcmp (
-    input wire [31:0] rs1,
-    input wire [31:0] rs2,
-    input wire unsigned_cmp, //0 signed, 1 unsigned
-    // output wire breq, // 0 not equal, 1 equal
-    // output wire brlt  // 0 not less than, 1 less than
-    output wire breq_s, breq_u, brlt_s, brlt_u
+    input wire [`DATA_WIDTH-1:0] i_rs1,
+    input wire [`DATA_WIDTH-1:0] i_rs2,
+    // input wire i_brun, //0 signed, 1 unsigned
+    // beq // 0 not equal, 1 equal
+    // blt, bltu // 0 not less than, 1 less than
+    output wire o_breq, o_brlt_s, o_brlt_u
 );
 
-    //beq signed
-    assign breq_s = ($signed(rs1) == $signed(rs2)) ? 1 : 0;
-    //beq unsigned
-    assign breq_u = (rs1 == rs2) ? 1 : 0;
+    //beq
+    assign o_breq = ($signed(i_rs1) == $signed(i_rs2)) ? 1 : 0;
     //blt signed
-    assign brlt_s = ($signed(rs1) < $signed(rs2)) ? 1 : 0;
+    assign o_brlt_s = ($signed(i_rs1) < $signed(i_rs2)) ? 1 : 0;
     //blt unsigned
-    assign brlt_u = (rs1 < rs2) ? 1 : 0;
+    assign o_brlt_u = (i_rs1 < i_rs2) ? 1 : 0;
 endmodule
 

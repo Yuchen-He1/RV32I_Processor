@@ -3,7 +3,8 @@
 
 module datapath (
     input wire clk,
-    input wire rst
+    input wire rst,
+    output wire [`DATA_WIDTH-1:0] debug
 );
     // Program Counter and Next PC wires
     wire [31:0] pc_current;

@@ -2,244 +2,244 @@
 // single cycle processor 
 // it will generate control signals for ALU, MUX, and dMEM, brcmp
 
-module control_logic (
-    input wire [31:0] instruction,
-    input wire breq,
-    input wire brlt,
-    output reg pcsel,
-    output reg [3:0] alu_op,
-    output reg operand1_sel,
-    output reg operand2_sel,
-    output reg reg_write,
-    output reg [2:0] immgen_sel,
-    output reg dmem_write,
-    output reg dmem_read,
-    output reg brunsigned,
-    output reg [1:0] writeback_sel
+module Control_logic (
+    input wire [31:0] i_inst,
+    input wire i_breq,
+    input wire i_brlt,
+    output reg o_pcsel,
+    output reg o_reg_w,
+    output reg [2:0] o_imm_sel,
+    output reg o_op1_sel,
+    output reg o_op2_sel,
+    output reg o_brun,
+    output reg [3:0] o_alu_ctrl,
+    output reg o_mem_r,
+    output reg o_mem_w,
+    output reg [1:0] o_wb_sel
 );
     wire [6:0] opcode;
     wire [2:0] funct3;
     wire [6:0] funct7; 
-    assign opcode = instruction[6:0];
-    assign funct3 = instruction[14:12];
-    assign funct7 = instruction[31:25];
+    assign opcode = i_inst[6:0];
+    assign funct3 = i_inst[14:12];
+    assign funct7 = i_inst[31:25];
 
 
 
     always @(*) begin
         case (opcode)
-            7'b0110111: begin // LUI
-            // pcsel = 1'b0;        // by deafult pc+4
-            // // operdan1_sel = x0  should x0+imm
-            // operand2_sel = 1'b0; // immeidate number
-            // reg_write = 1'b1;    // write to rd
-            // immgen_sel = 3'b100; // U-type immediate
-            // dmem_read = 1'b0;    // no need to read from dmem
-            // dmem_write = 1'b0;   // no need to write to dmem
-            // brunsigned = 1'b0;   // no need to compare
+            `OP_LUI: begin // LUI
+                o_pcsel = 1'b0;        // by deafult pc+4
+                o_mem_r = 1'b0;    // no need to read from dmem
+                o_mem_w = 1'b0;    // no need to write to dmem
+                o_reg_w = 1'b1;    // write to rd
+                o_wb_sel = 2'b11; // write immeidate number to rd
+                o_imm_sel = `IMM_U_TYPE; // U-type immediate
+                o_alu_ctrl = `OP_ALU_NOP; // no operation
             end
-            7'b0010111: begin // AUIPC
+            `OP_AUIPC: begin // AUIPC
+                o_pcsel = 1'b0;        // by deafult pc+4
+                o_op1_sel = 1'b1; // current pc
+                o_op2_sel = 1'b0; // immeidate number
+                o_mem_r = 1'b0;    // no need to read from dmem
+                o_mem_w = 1'b0;    // no need to write to dmem
+                o_reg_w = 1'b1;    // write to rd
+                o_wb_sel = 2'b01; // write pc+imm to rd
+                o_imm_sel = `IMM_U_TYPE; // U-type immediate
+                o_alu_ctrl = `OP_ALU_ADD; // pc + imm use add operation
             end
-            7'b1101111: begin // JAL
-            pcsel = 1'b1;        // not pc+4 instead address after alu computation
-            operand1_sel = 1'b1; // current pc
-            operand2_sel = 1'b0; // immeidate number 
-            reg_write = 1'b1;    // write pc+4 to rd
-            immgen_sel = 3'b011; // J-type immediate
-            dmem_read = 1'b0;    // no need to read from dmem
-            dmem_write = 1'b0;   // no need to write to dmem
-            brunsigned = 1'b0;   // no need to compare
-            writeback_sel = 2'b00; // write pc+4 to rd
-            alu_op = 4'b0000;   // pc + imm use add operation
+            `OP_JAL: begin // JAL
+                o_pcsel = 1'b1;        // not pc+4 instead address after alu computation
+                o_op1_sel = 1'b1; // current pc
+                o_op2_sel = 1'b0; // immeidate number 
+                o_mem_r = 1'b0;    // no need to read from dmem
+                o_mem_w = 1'b0;    // no need to write to dmem
+                o_reg_w = 1'b1;    // write pc+4 to rd
+                o_wb_sel = 2'b10; // write pc+4 to rd
+                o_imm_sel = `IMM_J_TYPE; // J-type immediate
+                o_alu_ctrl = `OP_ALU_ADD; // pc + imm use add operation
             end
-            7'b1100111: begin // JALR
-            pcsel = 1'b1;        // not pc+4 instead address after alu computation
-            operand1_sel = 1'b0;  // rs1 
-            operand2_sel = 1'b0; // immeidate number
-            reg_write = 1'b1;    // write pc+4 to rd
-            immgen_sel = 3'b000; // I-type immediate
-            dmem_read = 1'b0;    // no need to read from dmem
-            dmem_write = 1'b0;   // no need to write to dmem
-            brunsigned = 1'b0;   // no need to compare
-            writeback_sel = 2'b00; // write pc+4 to rd
-            alu_op = 4'b0000;   // rs1 + imm use add operation
+            `OP_JALR: begin // JALR
+                o_pcsel = 1'b1;        // not pc+4 instead address after alu computation
+                o_op1_sel = 1'b0;  // rs1 
+                o_op2_sel = 1'b0; // immeidate number
+                o_mem_r = 1'b0;    // no need to read from dmem
+                o_mem_w = 1'b0;    // no need to write to dmem
+                o_reg_w = 1'b1;    // write pc+4 to rd
+                o_wb_sel = 2'b10; // write pc+4 to rd
+                o_imm_sel = `IMM_I_TYPE; // I-type immediate
+                o_alu_ctrl = `OP_ALU_ADD; // pc + imm use add operation
             end 
-            7'b1100011: begin // B-type
-                pcsel = 1'b0;    // by deafult pc+4
-                immgen_sel = 3'b010; // B-type immediate    
-                operand1_sel = 1'b1; // pc
-                operand2_sel = 1'b0; // immeidate number
-                reg_write = 1'b0;    // no need to write to rd
-                dmem_read = 1'b0;    // no need to read from dmem
-                dmem_write = 1'b0;   // no need to write to dmem
-                brunsigned = 1'b0;   // by deafult signed compare
-                writeback_sel = 2'b11; // no need to write to rd
-                alu_op = 4'b0000;   // pc + imm use add operation
+            `OP_BRANCH: begin // B-type  
+                o_op1_sel = 1'b1; // current pc
+                o_op2_sel = 1'b0; // immeidate number
+                o_mem_r = 1'b0;    // no need to read from dmem
+                o_mem_w = 1'b0;    // no need to write to dmem
+                o_reg_w = 1'b0;    // write pc+4 to rd
+                o_imm_sel = `IMM_B_TYPE; // B-type immediate
+                o_alu_ctrl = `OP_ALU_ADD; // pc + imm use add operation
                 case (funct3)
                     3'b000: begin // BEQ
-                        if (breq) begin
-                            pcsel = 1'b1;
+                        if (i_breq) begin
+                            o_pcsel = 1'b1;
                         end
                     end
                     3'b001: begin // BNE
-                        if (~breq) begin
-                            pcsel = 1'b1;
+                        if (~i_breq) begin
+                            o_pcsel = 1'b1;
                         end
                     end
                     3'b100: begin // BLT
-                        if (brlt) begin
-                            pcsel = 1'b1;
+                        if (i_brlt) begin
+                            o_pcsel = 1'b1;
                         end
                     end
                     3'b101: begin // BGE
-                        if (~brlt) begin
-                            pcsel = 1'b1;
+                        if (~i_brlt) begin
+                            o_pcsel = 1'b1;
                         end
                     end
                     3'b110: begin // BLTU
-                        brunsigned = 1'b1;// unsigned compare
-                        if (brlt) begin
-                            pcsel = 1'b1;
+                        o_brun = 1'b1;// unsigned compare
+                        if (i_brlt) begin
+                            o_pcsel = 1'b1;
                         end
                     end
                     3'b111: begin // BGEU
-                        brunsigned = 1'b1;// unsigned compare
-                        if (~brlt) begin
-                            pcsel = 1'b1;
+                        o_brun = 1'b1;// unsigned compare
+                        if (~i_brlt) begin
+                            o_pcsel = 1'b1;
                         end
                     end
                 endcase
             end
             //load & store only support lw,sw
-            7'b0000011: begin // I-type load
-                pcsel = 1'b0;    // by deafult pc+4
-                operand1_sel = 1'b0; // rs1
-                operand2_sel = 1'b0; // immeidate number
-                reg_write = 1'b1;    // write to rd
-                immgen_sel = 3'b000; // I-type immediate
-                dmem_read = 1'b1;    // read from dmem
-                dmem_write = 1'b0;   // no need to write to dmem
-                brunsigned = 1'b0;   // no need to compare
-                writeback_sel = 2'b01; // write data from dmem to rd
-                alu_op = 4'b0000;   // rs1 + imm use add operation
+            `OP_LOAD: begin // I-type load
+                o_pcsel = 1'b0;    // by deafult pc+4
+                o_op1_sel = 1'b0; // rs1
+                o_op2_sel = 1'b0; // immeidate number
+                o_mem_r = 1'b1;    // read from dmem
+                o_mem_w = 1'b0;    // no need to write to dmem
+                o_reg_w = 1'b1;    // write to rd
+                o_wb_sel = 2'b00; // write data from dmem to rd
+                o_imm_sel = `IMM_I_TYPE; // I-type immediate
+                o_alu_ctrl = `OP_ALU_ADD; // rs1 + imm use add operation
             end
-            7'b0100011: begin // S-type store
-                pcsel = 1'b0;    // by deafult pc+4
-                operand1_sel = 1'b0; // rs1
-                operand2_sel = 1'b0; // immeidate number
-                reg_write = 1'b0;    // no need to write to rd
-                immgen_sel = 3'b001; // S-type immediate
-                dmem_read = 1'b0;    // no need to read from dmem
-                dmem_write = 1'b1;   // write to dmem
-                brunsigned = 1'b0;   // no need to compare
-                writeback_sel = 2'b11; // no need to write to rd
-                alu_op = 4'b0000;   // rs1 + imm use add operation
+            `OP_STORE: begin // S-type store
+                o_pcsel = 1'b0;    // by deafult pc+4
+                o_op1_sel= 1'b0; // rs1
+                o_op2_sel = 1'b0; // immeidate number
+                o_mem_r = 1'b0;    // no need to read from dmem
+                o_mem_w = 1'b1;    // write to dmem
+                o_reg_w = 1'b0;    // no need to write to rd
+                o_imm_sel = `IMM_S_TYPE; // S-type immediate
+                o_alu_ctrl = `OP_ALU_ADD; // rs1 + imm use add operation
             end
-            7'b0010011: begin // I-type ALU
-                pcsel = 1'b0;    // by deafult pc+4
-                operand1_sel = 1'b0; // rs1
-                operand2_sel = 1'b0; // immeidate number
-                reg_write = 1'b1;    // write to rd
-                immgen_sel = 3'b000; // I-type immediate
-                dmem_read = 1'b0;    // no need to read from dmem
-                dmem_write = 1'b0;   // no need to write to dmem
-                brunsigned = 1'b0;   // no need to compare
-                writeback_sel = 2'b10; // write data from ALU to rd
+            `OP_ALUI: begin // I-type ALU
+                o_pcsel = 1'b0;    // by deafult pc+4
+                o_op1_sel= 1'b0; // rs1
+                o_op2_sel = 1'b0; // immeidate number
+                o_mem_r = 1'b0;    // no need to read from dmem
+                o_mem_w = 1'b0;    // no need write to dmem
+                o_reg_w = 1'b1;    // write to rd
+                o_wb_sel = 2'b01; // write data from ALU to rd
+                o_imm_sel = `IMM_I_TYPE; // I-type immediate
                 case (funct3)
                     3'b000: begin // ADDI
-                        alu_op = 4'b0000;
+                        o_alu_ctrl = `OP_ALU_ADD;
                     end
                     3'b010: begin // SLTI
-                        alu_op = 4'b1001;
+                        o_alu_ctrl = `OP_ALU_SLT;
                     end
                     3'b011: begin // SLTIU
-                        alu_op = 4'b1010;
+                        o_alu_ctrl = `OP_ALU_SLTU;
                     end
                     3'b100: begin // XORI
-                        alu_op = 4'b0100;
+                        o_alu_ctrl = `OP_ALU_XOR;
                     end
                     3'b110: begin // ORI
-                        alu_op = 4'b0011;
+                        o_alu_ctrl = `OP_ALU_OR;
                     end
                     3'b111: begin // ANDI
-                        alu_op = 4'b0010;
+                        o_alu_ctrl = `OP_ALU_AND;
                     end
                     3'b001: begin // SLLI
-                        alu_op = 4'b0110;
+                        o_alu_ctrl = `OP_ALU_SLL;
                     end
                     3'b101: begin // SR?I
-                    if (funct7[5]) begin
-                        alu_op = 4'b1000; // SRAI
-                    end else begin
-                        alu_op = 4'b0111; // SRLI
+                        if (funct7[5]) begin
+                            o_alu_ctrl = `OP_ALU_SRA; // SRAI
+                        end else begin
+                            o_alu_ctrl = `OP_ALU_SRL; // SRLI
+                        end
                     end
+                    default: begin
+                        o_alu_ctrl = `OP_ALU_NOP;
                     end
                 endcase
             end
-            7'b0110011: begin // R-type ALU
-                pcsel = 1'b0;    // by deafult pc+4
-                operand1_sel = 1'b0; // rs1
-                operand2_sel = 1'b1; // rs2
-                reg_write = 1'b1;    // write to rd
-                immgen_sel = 3'b111; //no need immediate number
-                dmem_read = 1'b0;    // no need to read from dmem
-                dmem_write = 1'b0;   // no need to write to dmem
-                brunsigned = 1'b0;   // no need to compare
-                writeback_sel = 2'b10; // write data from ALU to rd
+            `OP_ALU: begin // R-type ALU
+                o_pcsel = 1'b0;    // by deafult pc+4
+                o_op1_sel= 1'b0; // rs1
+                o_op2_sel = 1'b1; // rs2
+                o_mem_r = 1'b0;    // no need to read from dmem
+                o_mem_w = 1'b0;    // no need write to dmem
+                o_reg_w = 1'b1;    // write to rd
+                o_wb_sel = 2'b01; // write data from ALU to rd
+                o_imm_sel = `IMM_NOP; // no immediate
                 case (funct3)
                     3'b000: begin // ADD/SUB
                         if (funct7[5]) begin
-                            alu_op = 4'b0001; // SUB
+                            o_alu_ctrl = `OP_ALU_SUB; // SUB
                         end else begin
-                            alu_op = 4'b0000; // ADD
+                            o_alu_ctrl = `OP_ALU_ADD; // ADD
                         end
                     end
                     3'b001: begin // SLL
-                        alu_op = 4'b0110;
+                        o_alu_ctrl = `OP_ALU_SLL;
                     end
                     3'b010: begin // SLT
-                        alu_op = 4'b1001;
+                        o_alu_ctrl = `OP_ALU_SLT;
                     end
                     3'b011: begin // SLTU
-                        alu_op = 4'b1010;
+                        o_alu_ctrl = `OP_ALU_SLTU;
                         //brunsigned = 1'b1;
                     end
                     3'b100: begin // XOR
-                        alu_op = 4'b0100;
+                        o_alu_ctrl = `OP_ALU_XOR;
                     end
                     3'b101: begin // SRL/SRA
                         if (funct7[5]) begin
-                            alu_op = 4'b1000; // SRA
+                            o_alu_ctrl = `OP_ALU_SRA; // SRA
                         end else begin
-                            alu_op = 4'b0111; // SRL
+                            o_alu_ctrl = `OP_ALU_SRL; // SRL
                         end
                     end
                     3'b110: begin // OR
-                        alu_op = 4'b0011;
+                        o_alu_ctrl = `OP_ALU_OR;
                     end
                     3'b111: begin // AND
-                        alu_op = 4'b0010;
+                        o_alu_ctrl = `OP_ALU_AND;
+                    end
+                    default: begin
+                        o_alu_ctrl = `OP_ALU_NOP;
                     end
                 endcase
             end
-            default: begin
-                // default values
-                pcsel            = 1'b0;
-                // operand1_sel 0-rs1 1-pc 
-                operand1_sel     = 1'b0;
-                // operand2_sel 0-imm 1-rs2
-                operand2_sel     = 1'b0;
-                reg_write        = 1'b0;
-                immgen_sel       = 3'b000;
-                dmem_write       = 1'b0;
-                dmem_read        = 1'b0;
-                brunsigned       = 1'b0;
-                // writeback_sel 00-pc+4 01-dmem 10-alu 11-no writeback
-                writeback_sel    = 2'b11;    
-                alu_op           = 4'b0000; // default add operation
+            `OP_FENCE: begin // FENCE
+                //TODO: implement FENCE
             end
-            //deafult set no writeback and  no permission write reg
-
+            `OP_SYSTEM: begin // SYSTEM
+                //TODO: implement SYSTEM
+            end
+            default: begin
+                o_pcsel = 1'b0;    // by deafult pc+4
+                o_mem_r = 1'b0;    // no need to read from dmem
+                o_mem_w = 1'b0;    // no need write to dmem
+                o_reg_w = 1'b0;    // no need to write to rd
+                o_imm_sel = `IMM_NOP; // no immediate
+                o_alu_ctrl = `OP_ALU_NOP; // no operation
+            end
         endcase
     end
 endmodule

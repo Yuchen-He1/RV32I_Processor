@@ -3,20 +3,24 @@
 // It only supports read operation
 
 module Imem (
-    input wire [31:0] pc,
-    output wire [31:0] instruction
+    input wire [`ADDR_WIDTH-1:0] i_pc,
+    output wire [`INST_WIDTH-1:0] o_inst
+    // output reg [`INST_WIDTH-1:0] o_inst
 );
     // initialize a constant memory(reg array) to store the instructions
     // use readmemh to read the instructions from the file
-    reg [31:0] mem[0:1023];
+    reg [`INST_WIDTH-1:0] mem[0:1023];
     // for test purpose, we only have 64 instructions
     initial begin
         $readmemh("instructions.txt", mem);
         //$display("Mem[0] = %h", mem[0]);
     end
 
-    
-    assign instruction = mem[pc[31:2]];
+    assign o_inst = mem[i_pc[31:2]];
+
+    // always @(i_pc) begin
+    //     o_inst = mem[i_pc >> 2];
+    // end
 
     // each time pc change we will read the instruction from the memory
     // can ignore the last two bits of pc
@@ -27,6 +31,5 @@ module Imem (
     //     always @(pc) begin
     //     $display("PC = %h, Index = %h, Instruction = %h", pc, pc[31:2], mem[pc[31:2]]);
     // end
-;  
-    
+
 endmodule
