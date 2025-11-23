@@ -1,2 +1,2 @@
 # single cycle processor based on RV32I
-![image](https://github.com/user-attachments/assets/109bf736-dbd3-4c91-b346-08b5a01f8a2a)
+<img width="781" height="438" alt="Screenshot 2025-11-22 194911" src="https://github.com/user-attachments/assets/7ca4f676-6076-46e9-8c6e-02e706d3f5e4" />
